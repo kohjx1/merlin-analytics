@@ -66,7 +66,7 @@ Terms:
   - When you know TF, you are able to see if you are using a term too much/too little
   - When a 100-word document contains the term “cat” 12 times, the TF for the word ‘cat’ is `TFcat = 12/100 = 0.12`
 
-- ## IDF (inverse document frequency) example:
+- IDF (inverse document frequency) example:
   - Size of corpus (a body of documents) is 10,000,000 million documents
   - If we assume there are 0.3 million documents that contain the term "cat", then IDF is given by the total number of documents [10,000,000] divided by number of documents containing the term "cat" [300,000]
   - `IDF (cat) = log (10,000,000/300,000) = 1.52`
@@ -77,3 +77,14 @@ Put the TF and IDF calculations together to get a TD-IDF score
 
 - `∴ Wcat = (TF*IDF) cat = 0.12 * 1.52 = 0.182`
 - A TF-IDF score of 0.182 is much closer to 0 than 1 (suggest that "cat" is a common term with less weight)
+
+### Data Analytics
+
+1. User form indicate what are the values they want and entities type
+2. Text to speech to Transcript (ask questions and automatically fill form)
+3. Backend process transcript
+4. Gather the keywords (backend keyword list/extract transcript keywords)
+5. Display on webpage (charts stats)
+
+- Frontend (HTTP Request - JSON)
+- Backend (Extract keyword from transcript - JSON)
