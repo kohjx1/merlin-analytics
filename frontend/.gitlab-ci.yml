@@ -1,0 +1,50 @@
+include:
+  - local: '/.ci-templates.yml'
+
+variables:
+  SERVICE_NAME: frontend
+  SERVICE_DIR: frontend
+
+stages:
+  - build
+  - test
+  - analyze
+  - deploy
+
+unittest:
+  stage: test
+  image: node:gallium-alpine
+  before_script:
+    - cd $CI_PROJECT_DIR/$SERVICE_DIR
+    - npm i -g pnpm
+    - pnpm i
+  script:
+    - pnpm run test:coverage
+  artifacts:
+    when: always
+    paths:
+      - $SERVICE_DIR/coverage
+    reports:
+      junit: $SERVICE_DIR/coverage/junit.xml
+
+codescan:
+  stage: analyze
+  image:
+    name: sonarsource/sonar-scanner-cli:4.7.0
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/${SERVICE_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  before_script:
+    - cd $CI_PROJECT_DIR/$SERVICE_DIR
+  script:
+    - |
+      sonar-scanner \
+        -Dsonar.qualitygate.wait=true \
+        -Dsonar.projectName=${CI_PROJECT_TITLE}_${SERVICE_NAME} \
+        -Dsonar.projectKey=${CI_PROJECT_NAMESPACE}_${CI_PROJECT_NAME}_${SERVICE_NAME}_${CI_PROJECT_ID} \
+        -Dsonar.sources=. \
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+        -Dsonar.working.directory={$CI_PROJECT_DIR} \
+        -Dsonar.host.url=$SONAR_HOST \
+        -Dsonar.login=$SONAR_TOKEN
