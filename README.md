@@ -88,3 +88,11 @@ Put the TF and IDF calculations together to get a TD-IDF score
 
 - Frontend (HTTP Request - JSON)
 - Backend (Extract keyword from transcript - JSON)
+
+### Remove stopwords
+
+https://stackabuse.com/removing-stop-words-from-strings-in-python/
+
+### Text Ranking
+
+https://stevenloria.com/tf-idf/

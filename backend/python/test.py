@@ -1,196 +1,86 @@
-# TF = No. of repetition of words in a sentence / Total words in a sentence
-# IDF = log(No. of sentence / No. of sentences containing word)
-# TDIDF = TF * IDF
+#Importing required module
+import numpy as np
+from nltk.tokenize import  word_tokenize 
 
-# declare imports
-import re
-import math
-import json
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from nltk.corpus import stopwords
+#Example text corpus for our tutorial
+text = ['Topic sentences are similar to mini thesis statements.\
+        Like a thesis statement, a topic sentence has a specific \
+        main point. Whereas the thesis is the main point of the essay',\
+        'the topic sentence is the main point of the paragraph.\
+        Like the thesis statement, a topic sentence has a unifying function. \
+        But a thesis statement or topic sentence alone doesn’t guarantee unity.', \
+        'An essay is unified if all the paragraphs relate to the thesis,\
+        whereas a paragraph is unified if all the sentences relate to the topic sentence.'
+       ]
+ 
+#Preprocessing the text data
+sentences = []
+word_set = []
 
-# Keywords (fire)
-bowFire = [
-    "fire",
-    "smoke",
-    "engine",
-    "black smoke",
-    "white smoke",
-    "white flames",
-    "explosion",
-    "explode",
-    "gas",
-    "electric bike",
-    "electric scooter",
-    "gas cylinder",
-    "lpg",
-    "molotov",
-    "oil drum",
-    "pallets",
-]
+for sent in text:
+    x = [i.lower() for  i in word_tokenize(sent) if i.isalpha()]
+    sentences.append(x)
+    for word in x:
+        if word not in word_set:
+            word_set.append(word)
 
-# Keywords (medical)
-bowMedical = [
-    "ambulance",
-    "polyclinic",
-    "faint",
-    "pain",
-    "sick",
-    "fall",
-    "fell",
-    "drowsy",
-    "breathing",
-    "conscious",
-    "bleeding",
-    "bleed",
-    "blood",
-]
+#Set of vocab 
+word_set = set(word_set)
+#Total documents in our corpus
+total_documents = len(sentences)
 
-# Sample Transcript
-transcript = ["O; 995, what's your emergency?",
-              "C; Hi, I think there is a fire at my neighbour's place. There is a lot of smoke coming from the window.",
-              "O; Okay, can I get your address?",
-              "C; The ppstal code is 530909.",
-              "O; So it's 909 Hougang Street 91?",
-              "C; Yes that's right.",
-              "O; Is anyone injured? Do you need an ambulance?",
-              "C; No, I don't think so.",
-              "O; Okay, a fire truck is on its way. How may I address you?",
-              "C; Jack.",
-              "O; Okay Jack, evacuate the building as soon as possible. ",
-              "C; Okay.",
-              "O; Okay, thank you Jack. Goodbye."
-             ]
+#Creating an index for each word in our vocab.
+index_dict = {} #Dictionary to store index for each word
+i = 0
+for word in word_set:
+    index_dict[word] = i
+    i += 1
 
-# convert array to string and lowercase all words
-text = " ".join(transcript).lower()
+#Create a count dictionary
+ 
+def count_dict(sentences):
+    word_count = {}
+    for word in word_set:
+        word_count[word] = 0
+        for sent in sentences:
+            if word in sent:
+                word_count[word] += 1
+    return word_count
+ 
+word_count = count_dict(sentences)
+print(word_count)
 
-# remove tags
-text = re.sub("</?.*?>"," <> ",text)
+#Term Frequency
+def termfreq(document, word):
+    N = len(document)
+    occurance = len([token for token in document if token == word])
+    return occurance/N
 
-# remove special characters
-text = re.sub("(\\d|\\W)+"," ",text)
+#Inverse Document Frequency
+def inverse_doc_freq(word):
+    try:
+        word_occurance = word_count[word] + 1
+    except:
+        word_occurance = 1
+    return np.log(total_documents/word_occurance)
 
-# convert string back to array
-text = text.split(" ")
+#TF-IDF
+def tf_idf(sentence):
+    tf_idf_vec = np.zeros((len(word_set),))
+    for word in sentence:
+        tf = termfreq(sentence,word)
+        idf = inverse_doc_freq(word)
+         
+        value = tf*idf
+        # index_dict[word] = value
+        tf_idf_vec[index_dict[word]] = value 
+    return tf_idf_vec
+    # return index_dict
 
-# declare variables
-wordsFiltered = []
-stopWords = set(stopwords.words('english'))
-
-# remove the stop words (unwanted words)
-# e.g. "and", "you", "both", "from"
-for w in text:
-    if w not in stopWords and w != "":
-        wordsFiltered.append(w)
-
-# automatically remove any duplicate words
-unrepeatedWords = set(wordsFiltered)
-
-# create a dictionary of unique words
-numOfWords = dict.fromkeys(unrepeatedWords, 0)
-
-wordList = [bowFire, bowMedical]
-
-
-print("Word Dictionary - Initial")
-print("---------------------------")
-print(numOfWords)
-print()
-
-for t in text:
-  for words in wordList:
-    for word in words:
-      if word in t:
-        print(word)
-        numOfWords[word] += 1
-
-# for word in bowMedical:
-#   wordDict[word] += 1
-
-# for word in bowB:
-#   wordDictB[word] += 1
-
-# for word in bowC:
-#   wordDictC[word] += 1
-
-print("Word Dictionary - Count")
-print("-------------------------")
-print(numOfWords)
-print()
-# print(wordDictB)
-# print(wordDictC)
-
-def computeTF(wordDict, bow):
-  tfDict = {}
-  bowCount = len(bow)
-  for word, count in wordDict.items():
-    tfDict[word] = count/float(bowCount)
-  return tfDict
-
-tfBow = computeTF(numOfWords, wordList)
-# tfBowB = computeTF(wordDictB, bowB)
-# tfBowC = computeTF(wordDictC, bowC)
-
-print("TF Bow")
-print("------------------")
-print(tfBow)
-
-def computeIDF(docList):
-  idfDict = {}
-  N = len(docList)
-
-  # {"key":value}
-  idfDict = dict.fromkeys(docList[0].keys(), 0)
-
-  # find num of docs which contains word
-  for doc in docList:
-    for word, val in doc.items():
-      if val > 0:
-        idfDict[word] += 1
-  
-  for word, val in idfDict.items():
-    if (val == 0):
-      idfDict[word] = float(0)
-    else:
-      idfDict[word] = math.log10((34+1)/float(val)+1.0)
-  
-  return idfDict
-
-idfs = computeIDF([numOfWords])
-print(idfs)
-
-  
-def computeTFIDF(tfBow, idfs):
-  tfidf = {}
-
-  for word, val in tfBow.items():
-    tfidf[word] = val*idfs[word]
-  return tfidf
-
-tfidfBow = computeTFIDF(tfBow, idfs)
-# tfidfBowB = computeTFIDF(tfBowB, idfs)
-# tfidfBowC = computeTFIDF(tfBowC, idfs)
-
-print()
-print("TFIDF")
-print("------------------")
-print(pd.DataFrame([tfidfBow]))
-
-# serializing JSON
-labels = []
-
-for key, val in tfidfBow.items():
-  labels.append({"word": key, "value": val, "group": "First"})
-
-# writing to sample.json
-with open("frontend/src/lib/data/sample.json", "w+") as f:
-    json.dump(labels, f, indent=4)
-
-    
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# tfidf = TfidfVectorizer()
-# response = tfidf.fit_transform(text)
-
-# print(pd.DataFrame(response.toarray(), columns = tfidf.get_feature_names_out()))
+#TF-IDF Encoded text corpus
+vectors = []
+for sent in sentences:
+    vec = tf_idf(sent)
+    vectors.append(vec)
+ 
+print(vec)
