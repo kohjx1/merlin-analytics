@@ -56,7 +56,6 @@ big
 both
 but
 by
-c
 came
 can
 cannot
@@ -111,7 +110,6 @@ find
 finds
 first
 for
-four
 from
 full
 fully
@@ -240,16 +238,15 @@ now
 nowhere
 number
 numbers
-o
 of
 off
 often
+okay
 old
 older
 oldest
 on
 once
-one
 only
 open
 opened
@@ -358,7 +355,6 @@ those
 though
 thought
 thoughts
-three
 through
 thus
 to
@@ -371,7 +367,6 @@ turn
 turned
 turning
 turns
-two
 u
 under
 until

@@ -1,0 +1,79 @@
+[
+  {
+    "carpark fire": ["carpark", "car-park", "car park", "multistorey", "multi-storey", "multi storey"],
+    "vegetation fire": ["vegetation", "open field", "grass patch", "grass", "patch", "field", "bush", "plantation"]
+  },
+  {
+    "fire-objects": [
+      "car",
+      "truck",
+      "motorcycle",
+      "tanker",
+      "rubbish bin",
+      "kitchen",
+      "trash",
+      "chute",
+      "field",
+      "basement",
+      "open air",
+      "multistorey",
+      "multi storey",
+      "multi story",
+      "multistory",
+      "dust bin",
+      "dustbin"
+    ]
+  },
+  {
+    "basement carpark fire": ["basement", "underground"],
+    "multistorey carpark fire": ["floor", "storey", "multi"]
+  },
+  {
+    "Fire_KW": [
+      "fire",
+      "smoke",
+      "engine",
+      "black smoke",
+      "white smoke",
+      "white flames",
+      "explosion",
+      "explode",
+      "gas",
+      "electric bike",
+      "electric scooter",
+      "gas cylinder",
+      "lpg",
+      "molotov",
+      "oil drum",
+      "pallets"
+    ]
+  },
+  {
+    "units": [
+      "zero",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven",
+      "twelve",
+      "thirteen",
+      "fourteen",
+      "fifteen",
+      "sixteen",
+      "seventeen",
+      "eighteen",
+      "nineteen"
+    ]
+  },
+  {
+    "tens": ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"],
+    "scales": ["hundred", "thousand", "million", "billion", "trillion"]
+  }
+]
