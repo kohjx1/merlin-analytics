@@ -1,10 +1,10 @@
 <script>
-  import item from '../../data/sample.json';
+  import chartData from '../../data/wordcloudData.json';
   import { WordCloudChart } from '@carbon/charts-svelte';
   import '@carbon/styles/css/styles.css';
   import '@carbon/charts/styles.css';
 
-  let data = item;
+  let data = chartData;
 </script>
 
 <WordCloudChart

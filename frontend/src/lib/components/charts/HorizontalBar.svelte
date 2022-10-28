@@ -1,35 +1,17 @@
 <script>
+  import chartData from '../../data/barchartData.json';
   import { BarChartSimple } from '@carbon/charts-svelte';
 
   import '@carbon/styles/css/styles.css';
   import '@carbon/charts/styles.css';
+
+  let data = chartData;
 </script>
 
 <BarChartSimple
-  data={[
-    {
-      group: 'Qty',
-      value: 65000
-    },
-    {
-      group: 'More',
-      value: 29123
-    },
-    {
-      group: 'Sold',
-      value: 35213
-    },
-    {
-      group: 'Restocking',
-      value: 51213
-    },
-    {
-      group: 'Misc',
-      value: 16932
-    }
-  ]}
+  {data}
   options={{
-    title: 'Horizontal simple bar (discrete)',
+    title: 'Top 10 keywords',
     axes: {
       left: {
         mapsTo: 'group',
