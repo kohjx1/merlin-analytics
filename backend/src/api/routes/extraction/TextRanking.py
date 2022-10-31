@@ -1,27 +1,10 @@
 import math
 import re
-import json
 from textblob import TextBlob as tb
 from gensim.parsing.preprocessing import remove_stopwords
 
 # filter based on operator/caller
 
-
-# TF = (Number of time the word occurs in the text) / (Total number of words in text)
-def tf(word, blob):
-    return blob.words.count(word) / len(blob.words)
-
-# Number of documents containing word
-def n_containing(word, bloblist):
-    return sum(1 for blob in bloblist if word in blob.words)
-
-# IDF = (Total number of documents / Number of documents with word t in it)
-def idf(word, bloblist):
-    return math.log(1 + len(bloblist) / (1 + n_containing(word, bloblist)))
-
-# TF-IDF = TF * IDF
-def tfidf(word, blob, bloblist):
-    return tf(word, blob) * idf(word, bloblist)
 
 # sample of compiled transcripts (array of arrays)
 # data will be taken from database
@@ -128,56 +111,166 @@ transcript = [
                 ],
              ]
 
-stopwords_file = open("backend/resources/stopwords.txt", "r")
-lines = stopwords_file.read().splitlines()
+# TF = (Number of time the word occurs in the text) / (Total number of words in text)
+def tf(word, blob):
+    return blob.words.count(word) / len(blob.words)
 
-my_stopwords = lines
+# Number of documents containing word
+def n_containing(word, bloblist):
+    return sum(1 for blob in bloblist if word in blob.words)
 
-def removestopwords(sentence):
+# IDF = (Total number of documents / Number of documents with word t in it)
+def idf(word, bloblist):
+    return math.log(1 + len(bloblist) / (1 + n_containing(word, bloblist)))
+
+# TF-IDF = TF * IDF
+def tfidf(word, blob, bloblist):
+    return tf(word, blob) * idf(word, bloblist)
+
+# remove words based on custom stopwords
+def removestopwords(sentence, stopwords):
     tokens = sentence.split(" ")
-    tokens_filtered= [word for word in tokens if not word in my_stopwords]
+    tokens_filtered= [word for word in tokens if not word in stopwords]
     return (" ").join(tokens_filtered)
 
-# declare variables
-text = ""
-labels = []
+# get top keywords (sorting)
+def generate_top_keywords(bloblist):
+  labels = []
 
-# convert array to string and lowercase all words
-for ts in transcript:
-  text += " ".join(ts).lower()
+  for i, blob in enumerate(bloblist):
+      print("Top words in document {}".format(i + 1))
+      scores = {word: tfidf(word, blob, bloblist) for word in blob.words}
+      sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+      for word, score in sorted_words[:10]:
+          labels.append({"group": word, "value": score})
+          print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
 
-# remove tags
-text = re.sub("</?.*?>"," <> ",text)
+  # sort JSON based on value (Top to Btm)
+  labels.sort(key=lambda x: x["value"])
 
-# remove special characters
-text = re.sub("(\\d|\\W)+"," ",text)
+  return labels
 
-# remove the stop words (unwanted words)
-# one from library, one from our custom stopwords (stopwords.txt)
-# e.g. "and", "you", "both", "from"
-document = remove_stopwords(text)
-document = removestopwords(text)
+# function (text ranking based on frequent words)
+def freq_text_ranking():
+  # declare variables
+  text = ""
 
-# TextBlob: Simplified Text Processing
-document = tb(document)
+  # convert array to string and lowercase all words
+  for ts in transcript:
+    text += " ".join(ts).lower()
 
-bloblist = [document]
+  # remove tags
+  text = re.sub("</?.*?>"," <> ",text)
 
-for i, blob in enumerate(bloblist):
-    print("Top words in document {}".format(i + 1))
-    scores = {word: tfidf(word, blob, bloblist) for word in blob.words}
-    sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    for word, score in sorted_words[:10]:
-        labels.append({"group": word, "value": score})
-        print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
+  # remove special characters
+  text = re.sub("(\\d|\\W)+"," ",text)
 
-# sort JSON based on value (Top to Btm)
-labels.sort(key=lambda x: x["value"])
+  # remove the stop words (unwanted words)
+  # one from library, one from our custom stopwords (stopwords.txt)
+  # e.g. "and", "you", "both", "from"
+  stopwords_file = open("backend/resources/stopwords.txt", "r")
+  lines = stopwords_file.read().splitlines()
 
-# writing to barChartData.json
-with open("frontend/src/lib/data/barchartData.json", "w+") as f:
-    json.dump(labels, f, indent=4)
+  my_stopwords = lines
+  
+  document = remove_stopwords(text)
+  document = removestopwords(text, my_stopwords)
 
-print()
-print("barchartData.json is created")
-print()
+  # TextBlob: Simplified Text Processing
+  document = tb(document)
+
+  bloblist = [document]
+
+  # generate top keywords
+  data = generate_top_keywords(bloblist)
+  return data
+  
+# function (text ranking based on operator)
+def operator_text_ranking():
+  # declare variables
+  text = ""
+  sentence_array = []
+
+  # convert array to string and lowercase all words
+  for ts in transcript:
+    for sentence in ts:
+      if "o" in sentence.split()[0].lower():
+        sentence_array.append(sentence.lower())
+
+  text = "".join(sentence_array)
+
+  # remove tags
+  text = re.sub("</?.*?>"," <> ",text)
+
+  # remove special characters
+  text = re.sub("(\\d|\\W)+"," ",text)
+
+  print(text)
+  print()
+  # remove the stop words (unwanted words)
+  # one from library, one from our custom stopwords (stopwords.txt)
+  # e.g. "and", "you", "both", "from"
+  stopwords_file = open("backend/resources/stopwords.txt", "r")
+  lines = stopwords_file.read().splitlines()
+
+  my_stopwords = lines
+  
+  document = remove_stopwords(text)
+  document = removestopwords(text, my_stopwords)
+
+  # # TextBlob: Simplified Text Processing
+  document = tb(document)
+
+  bloblist = [document]
+
+  # generate top keywords
+  data = generate_top_keywords(bloblist)
+  print(data)
+  return data
+
+# function (text ranking based on operator)
+def caller_text_ranking():
+  # declare variables
+  text = ""
+  sentence_array = []
+
+  # convert array to string and lowercase all words
+  for ts in transcript:
+    for sentence in ts:
+      if "c" in sentence.split()[0].lower():
+        sentence_array.append(sentence.lower())
+
+  text = "".join(sentence_array)
+
+  # remove tags
+  text = re.sub("</?.*?>"," <> ",text)
+
+  # remove special characters
+  text = re.sub("(\\d|\\W)+"," ",text)
+
+  print(text)
+  print()
+  # remove the stop words (unwanted words)
+  # one from library, one from our custom stopwords (stopwords.txt)
+  # e.g. "and", "you", "both", "from"
+  stopwords_file = open("backend/resources/stopwords.txt", "r")
+  lines = stopwords_file.read().splitlines()
+
+  my_stopwords = lines
+  
+  document = remove_stopwords(text)
+  document = removestopwords(text, my_stopwords)
+
+  # # TextBlob: Simplified Text Processing
+  document = tb(document)
+
+  bloblist = [document]
+
+  # generate top keywords
+  data = generate_top_keywords(bloblist)
+  print(data)
+  return data
+
+
+# operator_text_ranking()
+caller_text_ranking()

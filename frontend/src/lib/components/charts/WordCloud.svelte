@@ -1,10 +1,24 @@
 <script>
-  import chartData from '../../data/wordcloudData.json';
   import { WordCloudChart } from '@carbon/charts-svelte';
   import '@carbon/styles/css/styles.css';
   import '@carbon/charts/styles.css';
+  import axios from 'axios';
 
-  let data = chartData;
+  let data = [];
+
+  async function GetKeywordExtraction() {
+    try {
+      const response = await axios.get(`http://localhost:8000/analysis/own-keyword-extraction`);
+
+      if (response.data) {
+        data = response.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  $: GetKeywordExtraction();
 </script>
 
 <WordCloudChart

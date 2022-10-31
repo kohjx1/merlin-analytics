@@ -1,11 +1,24 @@
 <script>
-  import chartData from '../../data/barchartData.json';
   import { BarChartSimple } from '@carbon/charts-svelte';
-
   import '@carbon/styles/css/styles.css';
   import '@carbon/charts/styles.css';
+  import axios from 'axios';
 
-  let data = chartData;
+  let data = [];
+
+  async function GetKeywordRanking() {
+    try {
+      const response = await axios.get(`http://localhost:8000/analysis/top-freq-keywords`);
+
+      if (response.data) {
+        data = response.data;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  $: GetKeywordRanking();
 </script>
 
 <BarChartSimple

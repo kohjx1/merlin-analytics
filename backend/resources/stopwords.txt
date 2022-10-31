@@ -56,6 +56,7 @@ big
 both
 but
 by
+c
 came
 can
 cannot
@@ -238,6 +239,7 @@ now
 nowhere
 number
 numbers
+o
 of
 off
 often

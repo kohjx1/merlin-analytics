@@ -10,36 +10,6 @@ from nltk.corpus import stopwords
 # IDF = log(No. of sentence / No. of sentences containing word)
 # TDIDF = TF * IDF
 
-# read the fire keywords json file (keywords_fire.txt)
-with open('backend/resources/keywords_fire.json', encoding='utf-8') as file:
-    data = json.load(file)
-
-bowFire = []
-for i in data:
-  for key, value in i.items():
-    for items in value:
-      bowFire.append(items)
-
-print("Keywords - Fire")
-print("====================================")
-print(bowFire)
-print()
-
-# read the medical keywords json file (keywords_med.txt)
-with open('backend/resources/keywords_med.json', encoding='utf-8') as file:
-    data = json.load(file)
-
-bowMedical = []
-for i in data:
-  for key, value in i.items():
-    for items in value:
-      bowMedical.append(items)
-
-print("Keywords - Medical")
-print("====================================")
-print(bowMedical)
-print()
-
 # sample of compiled transcripts (array of arrays)
 # data will be taken from database
 transcript = [
@@ -145,102 +115,51 @@ transcript = [
                 ],
              ]
 
-# declare variables
-text = ""
-wordsFiltered = []
-wordList = []
-labels = []
+# read the keywords json file (keywords_?.txt)
+# e.g. 'backend/resources/keywords_fire.json'
+def read_keywords(filename):
+  with open(filename, encoding='utf-8') as file:
+    data = json.load(file)
 
-# convert array to string and lowercase all words
-for ts in transcript:
-  text += " ".join(ts).lower()
+  bowList = []
 
-# remove tags
-text = re.sub("</?.*?>"," <> ",text)
+  for i in data:
+    for key, value in i.items():
+      for items in value:
+        bowList.append(items)
 
-# remove special characters
-text = re.sub("(\\d|\\W)+"," ",text)
+  return bowList
 
-# convert string back to array
-text = text.split(" ")
+# store unique keywords in an array
+def store_keywords(bowList):
+  wordList = []
 
-# remove blank field
-for txt in text:
-  if txt == "":
-    text.remove(txt)
+  for bow in bowList:
+    for word in bow:
+      wordList.append(word)
 
-print("Transcript - Text")
-print("====================================")
-print(text)
-print()
+  # remove duplicates in wordlist
+  wordList = list(dict.fromkeys(wordList))
 
-# read custom stopwords.txt
-stopwords_file = open("backend/resources/stopwords.txt", "r")
-lines = stopwords_file.read().splitlines()
+  return wordList
 
-stopWords = set(stopwords.words('english') + lines)
+# unique keywords count
+def count_keywords(numOfWords, text, wordList):
+  for index, txt in enumerate(text):
+      if txt in wordList:
+        numOfWords[txt] += 1
+  return numOfWords
 
-# remove the stop words (unwanted words)
-# e.g. "and", "you", "both", "from"
-for word in text:
-    if word not in stopWords and word != "":
-        wordsFiltered.append(word)
-
-# automatically remove any duplicate words
-unrepeatedWords = set(wordsFiltered)
-
-print("Transcript - Filtered Text [removed unwanted words]")
-print("====================================")
-print(unrepeatedWords)
-print()
-
-# create a dictionary of unique words
-numOfWords = dict.fromkeys(unrepeatedWords, 0)
-
-# NOTE: try not to hardcode (there could be more than these two keywords array)
-# store fire keywords
-for word in bowFire:
-  wordList.append(word)
-
-# store medical keywords
-for word in bowMedical:
-  wordList.append(word)
-
-# remove duplicates in wordlist
-wordList = list(dict.fromkeys(wordList))
-
-print("Word Dictionary - Unique Word [before count]")
-print("====================================")
-print(numOfWords)
-print()
-
-
-for index, txt in enumerate(text):
-  print(index)
-  print(txt)
-  if txt in wordList:
-    print("[keyword]")
-    numOfWords[txt] += 1
-
-print("Word Dictionary - Unique Word [after count]")
-print("====================================")
-print(numOfWords)
-print()
-
-def computeTF(wordDict, bow):
+# calculate TF
+def compute_TF(wordDict, bow):
   tfDict = {}
   bowCount = len(bow)
   for word, count in wordDict.items():
     tfDict[word] = count/float(bowCount)
   return tfDict
 
-tfBow = computeTF(numOfWords, wordList)
-
-print("TF Bow")
-print("====================================")
-print(tfBow)
-
-def computeIDF(docList):
+# calculate IDF
+def compute_IDF(docList):
   idfDict = {}
   N = len(docList)
 
@@ -260,48 +179,140 @@ def computeIDF(docList):
       idfDict[word] = math.log((N+1)/float(val)+1.0)
   
   return idfDict
-
-idfs = computeIDF([numOfWords])
-print("IDF")
-print("====================================")
-print(idfs)
-print()
   
-def computeTFIDF(tfBow, idfs):
+# calculate TFIDF
+def compute_TFIDF(tfBow, idfs):
   tfidf = {}
 
   for word, val in tfBow.items():
     tfidf[word] = val*idfs[word]
   return tfidf
 
-tfidfBow = computeTFIDF(tfBow, idfs)
+# serializing JSON in array
+def compute_data(tfidfBow, bowFire, bowMedical):
+  labels = []
 
-print("TFIDF")
-print("====================================")
-print(pd.DataFrame([tfidfBow]))
-print()
+  for key, val in tfidfBow.items():
+      if val > 0 and key in bowFire and key in bowMedical:
+        labels.append({"word": key, "value": val, "group": "Fire & Medical"})  
+      elif val > 0 and key in bowFire:
+        labels.append({"word": key, "value": val, "group": "Fire"})
+      elif val > 0 and key in bowMedical:
+        labels.append({"word": key, "value": val, "group": "Medical"})
 
-# serializing JSON
-for key, val in tfidfBow.items():
-  if val > 0 and key in bowFire and key in bowMedical:
-    labels.append({"word": key, "value": val, "group": "Fire & Medical"})
-  elif val > 0 and key in bowFire:
-    labels.append({"word": key, "value": val, "group": "Fire"})
-  elif val > 0 and key in bowMedical:
-    labels.append({"word": key, "value": val, "group": "Medical"})
+  # sort JSON based on value (Top to Btm)
+  labels.sort(key=lambda x: x["value"], reverse=True)
 
-# sort JSON based on value (Top to Btm)
-labels.sort(key=lambda x: x["value"], reverse=True)
+  # array of json
+  return labels
+  
+# function (keyword extraction based on our own keywords)
+def keyword_extraction():
+  # declare variables
+  text = ""
+  wordsFiltered = []
+  wordList = []
 
-# writing to wordcloudData.json 
-with open("frontend/src/lib/data/wordcloudData.json", "w+") as f:
-    json.dump(labels, f, indent=4)
+  # read keywords json files
+  bowFire = read_keywords("backend/resources/keywords_fire.json")
+  bowMedical = read_keywords("backend/resources/keywords_med.json")
 
-print("wordcloudData.json is created")
-print()
+  print("Keywords - Fire")
+  print("====================================")
+  print(bowFire)
+  print()
 
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# tfidf = TfidfVectorizer()
-# response = tfidf.fit_transform(text)
+  print("Keywords - Medical")
+  print("====================================")
+  print(bowMedical)
+  print()
 
-# print(pd.DataFrame(response.toarray(), columns = tfidf.get_feature_names_out()))
+  # convert array to string and lowercase all words
+  for ts in transcript:
+    text += " ".join(ts).lower()
+
+  # remove tags
+  text = re.sub("</?.*?>"," <> ",text)
+
+  # remove special characters
+  text = re.sub("(\\d|\\W)+"," ",text)
+
+  # convert string back to array
+  text = text.split(" ")
+
+  # remove blank field
+  for txt in text:
+    if txt == "":
+      text.remove(txt)
+
+  print("Transcript - Text")
+  print("====================================")
+  print(text)
+  print()
+
+  # read custom stopwords.txt
+  stopwords_file = open("backend/resources/stopwords.txt", "r")
+  lines = stopwords_file.read().splitlines()
+
+  # include library stopwords with custom stopwords
+  stopWords = set(stopwords.words('english') + lines)
+
+  # remove the stop words (unwanted words)
+  # e.g. "and", "you", "both", "from"
+  for word in text:
+      if word not in stopWords and word != "":
+          wordsFiltered.append(word)
+
+  # automatically remove any duplicate words
+  unrepeatedWords = set(wordsFiltered)
+
+  print("Transcript - Filtered Text [removed unwanted words]")
+  print("====================================")
+  print(unrepeatedWords)
+  print()
+
+  # create a dictionary of unique words
+  numOfWords = dict.fromkeys(unrepeatedWords, 0)
+
+  # store unqiue keywords
+  wordList = store_keywords([bowFire, bowMedical])
+
+  print("Word Dictionary - Unique Word [before count]")
+  print("====================================")
+  print(numOfWords)
+  print()
+
+  # count stored unique keywords
+  numOfWords = count_keywords(numOfWords, text, wordList)
+
+  print("Word Dictionary - Unique Word [after count]")
+  print("====================================")
+  print(numOfWords)
+  print()
+
+  # calculate TF
+  tfBow = compute_TF(numOfWords, wordList)
+
+  print("TF Bow")
+  print("====================================")
+  print(tfBow)
+
+  # calculate IDF
+  idfs = compute_IDF([numOfWords])
+
+  print("IDF")
+  print("====================================")
+  print(idfs)
+  print()
+
+  # calculate TFIDF
+  tfidfBow = compute_TFIDF(tfBow, idfs)
+
+  print("TFIDF")
+  print("====================================")
+  print(pd.DataFrame([tfidfBow]))
+  print()
+
+  # get array of json data (unique words sorted by TFIDF)
+  data = compute_data(tfidfBow, bowFire, bowMedical)
+  return data
