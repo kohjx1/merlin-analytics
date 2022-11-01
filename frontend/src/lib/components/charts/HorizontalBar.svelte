@@ -4,25 +4,11 @@
   import '@carbon/charts/styles.css';
   import axios from 'axios';
 
-  let data = [];
-
-  async function GetKeywordRanking() {
-    try {
-      const response = await axios.get(`http://localhost:8000/analysis/top-freq-keywords`);
-
-      if (response.data) {
-        data = response.data;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  $: GetKeywordRanking();
+  export let barChartData = [];
 </script>
 
 <BarChartSimple
-  {data}
+  data={barChartData}
   options={{
     title: 'Top 10 keywords',
     axes: {
