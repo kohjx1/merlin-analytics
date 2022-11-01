@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Body, Request, Response, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from typing import List
 from api.routes.extraction.OwnKeywordExtraction import *
 from api.routes.extraction.TextRanking import *
 
@@ -19,3 +21,11 @@ async def top_operator_keywords(request: Request):
 @route.get("/top-caller-keywords", response_description="Top Frequent Caller Keywords")
 async def top_caller_keywords(request: Request):
     return caller_text_ranking()
+
+@route.get("/get-types", response_description="List all types")
+def list_types(request: Request):
+    types = []
+    for filter in request.app.database["filter"].find():
+        # Note: Every items object must have a unique "id" property and "text" property to display on frontend
+        types.append({"id":filter["id"], "text":filter["type"]})
+    return types

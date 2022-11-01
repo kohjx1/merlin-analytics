@@ -1,6 +1,9 @@
+import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pymongo import MongoClient
+from dotenv import load_dotenv
 from api.routes import routers
 
 origins = [
@@ -22,24 +25,21 @@ app.add_middleware(
 app.include_router(routers.route)
 
 # connect to database
-# if __name__ == "__main__":
-#     uvicorn.run(
-#         "main:app",
-#         host=settings.HOST,
-#         reload=settings.DEBUG_MODE,
-#         port=settings.PORT,
-#     )
+load_dotenv()
+db_connection = os.getenv("ATLAS_URI")
+db_name = os.getenv("DB_NAME")
 
 # open connection to database server
-# @app.on_event("startup")
-# async def startup_db_client():
-#     app.mongodb_client = AsyncIOMotorClient(settings.DB_URL)
-#     app.mongodb = app.mongodb_client[settings.DB_NAME]
+@app.on_event("startup")
+def startup_db_client():
+    app.mongodb_client = MongoClient(db_connection)
+    app.database = app.mongodb_client[db_name]
+    print("Connected to the MongoDB database!")
 
-# close connection to database server
-# @app.on_event("shutdown")
-# async def shutdown_db_client():
-#     app.mongodb_client.close()
+# # close connection to database server
+@app.on_event("shutdown")
+def shutdown_db_client():
+    app.mongodb_client.close()
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)
