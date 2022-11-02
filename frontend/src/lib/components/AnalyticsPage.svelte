@@ -66,14 +66,25 @@
     { id: '2', text: 'Caller' }
   ];
 
+  let number_items = [
+    { id: '0', text: '10' },
+    { id: '1', text: '15' },
+    { id: '2', text: '20' },
+    { id: '3', text: '25' },
+    { id: '4', text: '30' }
+  ];
+
   let type_items = [];
   let barChartData = [];
   let wordCloudData = [];
-  let barchart_selectedId = '0';
+
+  let barchart_caller_selectedId = '0';
+  let barchart_number_selectedId = '0';
   let wordcloud_selectedId = [];
 
   // dropdown (bar chart)
-  const formatSelected = (id) => caller_items.find((item) => item.id === id)?.text ?? 'N/A';
+  const formatSelectedCaller = (id) => caller_items.find((item) => item.id === id)?.text ?? 'N/A';
+  const formatSelectedNumber = (id) => number_items.find((item) => item.id === id)?.text ?? 'N/A';
 
   // multi-select (word cloud)
   const formatSelectedId = (i) =>
@@ -84,7 +95,8 @@
       ? 'N/A'
       : i.map((id) => type_items.find((item) => item.id === id).text).join(', ');
 
-  $: barChartText = formatSelected(barchart_selectedId);
+  $: barChartCallerText = formatSelectedCaller(barchart_caller_selectedId);
+  $: barChartNumberText = formatSelectedNumber(barchart_number_selectedId);
   $: wordCloudId = formatSelectedId(wordcloud_selectedId);
   $: wordCloudText = formatSelectedText(wordcloud_selectedId);
 
@@ -113,27 +125,27 @@
     }
   }
 
-  async function GetKeywordRanking(filter) {
+  async function GetKeywordRanking(filterText, filterNum) {
     try {
-      // operator
-      if (filter == 'Operator') {
-        const response = await axios.get(`http://localhost:8000/analysis/top-operator-keywords`);
-        if (response.data) {
-          barChartData = response.data;
-        }
+      let response = await axios.post(
+        `http://localhost:8000/analysis/top-freq-keywords`,
+        filterNum
+      );
+
+      if (filterText == 'Operator') {
+        response = await axios.post(
+          `http://localhost:8000/analysis/top-operator-keywords`,
+          filterNum
+        );
+      } else if (filterText == 'Caller') {
+        response = await axios.post(
+          `http://localhost:8000/analysis/top-caller-keywords`,
+          filterNum
+        );
       }
-      // caller
-      else if (filter == 'Caller') {
-        const response = await axios.get(`http://localhost:8000/analysis/top-caller-keywords`);
-        if (response.data) {
-          barChartData = response.data;
-        }
-      } else {
-        // default - both operator/caller
-        const response = await axios.get(`http://localhost:8000/analysis/top-freq-keywords`);
-        if (response.data) {
-          barChartData = response.data;
-        }
+
+      if (response.data) {
+        barChartData = response.data;
       }
     } catch (error) {
       console.log(error);
@@ -145,9 +157,6 @@
       const response = await axios.get(`http://localhost:8000/analysis/get-types`);
 
       if (response.data) {
-        // for (var i = 0; i < response.data.length; i++) {
-        //   items.push(response.data[i]);
-        // }
         type_items = response.data;
       }
     } catch (error) {
@@ -155,7 +164,7 @@
     }
   }
 
-  $: GetKeywordRanking(barChartText);
+  $: GetKeywordRanking(barChartCallerText, barChartNumberText);
   $: GetKeywordExtraction(wordCloudText);
   $: GetTypes();
 </script>
@@ -184,16 +193,21 @@
     </div>
     <div class="...">
       <!-- Sorted by 5/10/15/20 etc -->
-      <MultiSelect titleText="Top Keywords Filter - Number" label="Select number..." />
+      <Dropdown
+        titleText="Top Keywords Filter - Numbers"
+        bind:selectedId={barchart_number_selectedId}
+        bind:items={number_items}
+      />
+      <div>Number: {barChartNumberText}</div>
     </div>
     <div class="...">
       <Dropdown
         titleText="Top Keywords Filter - Operator/Caller"
-        bind:selectedId={barchart_selectedId}
+        bind:selectedId={barchart_caller_selectedId}
         bind:items={caller_items}
       />
+      <div>Speaker: {barChartCallerText}</div>
     </div>
-    <div>Primary: {barChartText}</div>
   </div>
   <br />
   <section class="bg-slate-50 rounded-xl p-5 h-fit">

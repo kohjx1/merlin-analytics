@@ -9,11 +9,11 @@
 <WordCloudChart
   data={wordCloudData}
   options={{
-    title: 'Word cloud',
+    title: 'Word Cloud',
     resizable: true,
     color: {
       pairing: {
-        option: 5
+        option: 10
       }
     },
     height: '400px'

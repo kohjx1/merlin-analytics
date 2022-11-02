@@ -10,7 +10,7 @@
 <BarChartSimple
   data={barChartData}
   options={{
-    title: 'Top 10 keywords',
+    title: 'Top Keywords',
     axes: {
       left: {
         mapsTo: 'group',
