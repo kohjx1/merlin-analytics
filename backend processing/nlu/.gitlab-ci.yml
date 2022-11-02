@@ -1,0 +1,52 @@
+include:
+  - local: '/.ci-templates.yml'
+
+variables:
+  SERVICE_NAME: nlu
+  SERVICE_DIR: backend/src/nlu
+
+stages:
+  - build
+  - test
+  - analyze
+  - deploy
+
+unittest:
+  stage: test
+  image: python:3.9-slim
+  before_script:
+    - cd $CI_PROJECT_DIR/$SERVICE_DIR
+    - pip install -r requirements.txt
+    - chmod +x scripts/nltk_dependencies.sh; scripts/nltk_dependencies.sh
+    - export FORM_MANAGER_URL=https://dev.merlin.intellism.tech/forms/v1
+  script:
+    - pytest app/tests --junit-xml=pytest.xml --cov=app --cov-report term-missing --cov-report xml --cov-branch
+  artifacts:
+    when: always
+    paths:
+      - $SERVICE_DIR/pytest.xml
+      - $SERVICE_DIR/coverage.xml
+    reports:
+      junit: $SERVICE_DIR/pytest.xml
+
+codescan:
+  stage: analyze
+  image:
+    name: sonarsource/sonar-scanner-cli:4.7.0
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/${SERVICE_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  before_script:
+    - cd $CI_PROJECT_DIR/$SERVICE_DIR
+    - sed -i -e "s|<source>.*</source>|<source>$(pwd)/app</source>|" coverage.xml
+  script:
+    - |
+      sonar-scanner \
+        -Dsonar.qualitygate.wait=true \
+        -Dsonar.projectName=${CI_PROJECT_TITLE}_${SERVICE_NAME} \
+        -Dsonar.projectKey=${CI_PROJECT_NAMESPACE}_${CI_PROJECT_NAME}_${SERVICE_NAME}_${CI_PROJECT_ID} \
+        -Dsonar.sources=app \
+        -Dsonar.python.coverage.reportPaths=coverage.xml \
+        -Dsonar.host.url=$SONAR_HOST \
+        -Dsonar.login=$SONAR_TOKEN

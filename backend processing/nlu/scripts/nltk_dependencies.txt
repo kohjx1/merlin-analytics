@@ -1,0 +1,5 @@
+omw-1.4
+stopwords
+wordnet
+snowball_data
+punkt

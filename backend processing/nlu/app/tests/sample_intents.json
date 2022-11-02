@@ -1,0 +1,31 @@
+[
+    {
+        "intent": "get_form_type",
+        "examples": [],
+        "entity_types": [
+            {"entity_type": "form_type", "isRequired": true} 
+        ],
+        "context": []
+    },
+    {
+        "intent": "fill_form_fire",
+        "examples": [],
+        "entity_types": [
+            {"entity_type": "age", "isRequired": true},
+            {"entity_type": "gender", "isRequired": true},
+            {"entity_type": "fire_premise", "isRequired": true}
+        ],
+        "context": ["fire"]
+    },
+    {
+        "intent": "fill_form_medical",
+        "examples": [],
+        "entity_types": [
+            {"entity_type": "age", "isRequired": true},
+            {"entity_type": "gender", "isRequired": true},
+            {"entity_type": "mental_symptoms", "isRequired": true},
+            {"entity_type": "physical_symptoms", "isRequired": true}
+        ],
+        "context": ["medical"]
+    }
+]

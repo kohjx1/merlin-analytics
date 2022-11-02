@@ -1,0 +1,159 @@
+[
+    {
+        "entity_type": "form_type",
+        "keywords": [],
+        "isNumeric": false, 
+        "entities": [
+            {
+                "entity": "fire", 
+                "synonyms": [
+                    "fire",
+                    "smoke",
+                    "engine",
+                    "black smoke",
+                    "white smoke",
+                    "white flames",
+                    "explosion",
+                    "explode",
+                    "gas",
+                    "electric bike",
+                    "electric scooter",
+                    "gas cylinder",
+                    "lpg",
+                    "molotov",
+                    "oil drum",
+                    "pallets"
+                ]
+            },
+            {
+                "entity": "medical", 
+                "synonyms": [
+                    "ambulance",
+                    "polyclinic",
+                    "faint",
+                    "pain",
+                    "sick",
+                    "fall",
+                    "fell",
+                    "drowsy",
+                    "breathing",
+                    "conscious",
+                    "bleeding",
+                    "bleed",
+                    "blood"
+                ]
+            }
+        ]
+    },
+    {
+        "entity_type": "fire_premise",
+        "keywords": ["where", "location"],
+        "isNumeric": false, 
+        "entities": [
+            {
+                "entity": "Carpark Fire", 
+                "synonyms": [
+                    "carpark",
+                    "car-park",
+                    "car park",
+                    "multistorey",
+                    "multi-storey",
+                    "multi storey"
+                ]
+            },
+            {
+                "entity": "Vegetation Fire", 
+                "synonyms": [
+                    "vegetation",
+                    "open field",
+                    "grass patch",
+                    "grass", 
+                    "patch",
+                    "field", 
+                    "bush",
+                    "plantation"
+                ]
+            }
+        ]
+    },
+    {
+        "entity_type": "age",
+        "keywords": ["age", "years old", "year old", "how old"],
+        "isNumeric": true, 
+        "entities": []
+    },
+    {
+        "entity_type": "gender",
+        "keywords": [],
+        "isNumeric": false, 
+        "entities": [
+            {
+                "entity": "Male", 
+                "synonyms": [
+                    "man",
+                    "male",
+                    "father",
+                    "dad",
+                    "daddy",
+                    "uncle",
+                    "grandfather",
+                    "grandpa",
+                    "son",
+                    "encik",
+                    "boy",
+                    "公公",
+                    "爸",
+                    "哥",
+                    "弟",
+                    "叔",
+                    "阿公",
+                    "爷"
+                ]
+            },
+            {
+                "entity": "Female", 
+                "synonyms": [
+                    "lady",
+                    "female",
+                    "auntie",
+                    "aunt",
+                    "aunty",
+                    "mother",
+                    "sister",
+                    "girl",
+                    "daughter",
+                    "grandmother",
+                    "grandma",
+                    "mom",
+                    "mum",
+                    "姑婆",
+                    "姑姑",
+                    "妈",
+                    "奶奶",
+                    "姐",
+                    "妹"
+                ]
+            }
+        ]
+    },
+    {
+        "entity_type": "mental_symptoms",
+        "keywords": [],
+        "isNumeric": false, 
+        "entities": [
+            {"entity": "Depression", "synonyms": ["depression", "depressed", "suicidal", "suicide"]},
+            {"entity": "Schizophrenia", "synonyms": ["hallucination", "hallucinate", "delusional"]}
+        ]
+    },
+    {
+        "entity_type": "physical_symptoms",
+        "keywords": [],
+        "isNumeric": false, 
+        "entities": [
+            {"entity": "Cough", "synonyms": ["cough", "coughing"]},
+            {"entity": "Fever", "synonyms": ["fever", "high temperature", "feverish"]},
+            {"entity": "Runny Nose", "synonyms": ["mucus", "flu", "runny nose", "blocked nose"]},
+            {"entity": "Headache", "synonyms": ["headache", "migraine"]}
+        ]
+    }
+]

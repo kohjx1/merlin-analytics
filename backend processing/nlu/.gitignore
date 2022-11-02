@@ -1,0 +1,15 @@
+.DS_Store
+.idea
+*.log
+tmp/
+pytest.xml
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+build
+htmlcov
+nltk_data/
+*coverage*
+references/
+*.bat
