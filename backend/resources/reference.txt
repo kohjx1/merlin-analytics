@@ -1,0 +1,14 @@
+sample medical.csv
+1. https://stomp.straitstimes.com/singapore-seen/having-a-stomachache-dont-call-995
+2. https://www.theguardian.com/society/2008/nov/29/unpublished-999-call-transcripts-cardiac-arrest
+3. https://studylib.es/doc/9136563/evidencencallingn911---5460ce9cb35987a---
+4. https://www.slideserve.com/oya/911-medical-emergency
+5. https://www.yumpu.com/en/document/read/36193215/transcript-of-911-emergency-call-placed-from-operation-rescue
+6. https://www.businessinsider.com/prince-dead-911-call-transcript-2016-4
+7. https://studylib.net/doc/15322575/practice-script-for-911-call-role-play
+8. https://www.scribd.com/document/352836281/Solution-Evidence-Calling-911
+
+
+sample fire.csv
+1. https://studylib.net/doc/15322575/practice-script-for-911-call-role-play
+2. https://docplayer.net/13215964-Calling-for-help-in-an-emergency.html

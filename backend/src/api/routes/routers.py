@@ -7,20 +7,20 @@ from api.routes.extraction.TextRanking import *
 route = APIRouter(prefix="/analysis")
 
 @route.get("/own-keyword-extraction", response_description="Own Keyword Extraction")
-async def own_keyword_extraction(request: Request):
+async def own_keyword_extraction():
     return keyword_extraction()
 
-@route.get("/top-freq-keywords", response_description="Top Frequent Keywords")
-async def top_freq_keywords(request: Request):
-    return freq_text_ranking()
+@route.post("/top-freq-keywords", response_description="Top Frequent Keywords")
+async def top_freq_keywords(filter = Body()):
+    return freq_text_ranking(int(filter))
 
-@route.get("/top-operator-keywords", response_description="Top Frequent Operator Keywords")
-async def top_operator_keywords(request: Request):
-    return operator_text_ranking()
+@route.post("/top-operator-keywords", response_description="Top Frequent Operator Keywords")
+async def top_operator_keywords(filter = Body()):
+    return operator_text_ranking(int(filter))
 
-@route.get("/top-caller-keywords", response_description="Top Frequent Caller Keywords")
-async def top_caller_keywords(request: Request):
-    return caller_text_ranking()
+@route.post("/top-caller-keywords", response_description="Top Frequent Caller Keywords")
+async def top_caller_keywords(filter = Body()):
+    return caller_text_ranking(int(filter))
 
 @route.get("/get-types", response_description="List all types")
 def list_types(request: Request):

@@ -134,14 +134,14 @@ def removestopwords(sentence, stopwords):
     return (" ").join(tokens_filtered)
 
 # get top keywords (sorting)
-def generate_top_keywords(bloblist):
+def generate_top_keywords(bloblist, filter):
   labels = []
 
   for i, blob in enumerate(bloblist):
       print("Top words in document {}".format(i + 1))
       scores = {word: tfidf(word, blob, bloblist) for word in blob.words}
       sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-      for word, score in sorted_words[:10]:
+      for word, score in sorted_words[:filter]:
           labels.append({"group": word, "value": score})
           print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
 
@@ -151,7 +151,7 @@ def generate_top_keywords(bloblist):
   return labels
 
 # function (text ranking based on frequent words)
-def freq_text_ranking():
+def freq_text_ranking(filter):
   # declare variables
   text = ""
 
@@ -180,13 +180,13 @@ def freq_text_ranking():
   document = tb(document)
 
   bloblist = [document]
-
+  
   # generate top keywords
-  data = generate_top_keywords(bloblist)
+  data = generate_top_keywords(bloblist, filter)
   return data
   
 # function (text ranking based on operator)
-def operator_text_ranking():
+def operator_text_ranking(filter):
   # declare variables
   text = ""
   sentence_array = []
@@ -224,12 +224,12 @@ def operator_text_ranking():
   bloblist = [document]
 
   # generate top keywords
-  data = generate_top_keywords(bloblist)
+  data = generate_top_keywords(bloblist, filter)
   print(data)
   return data
 
 # function (text ranking based on operator)
-def caller_text_ranking():
+def caller_text_ranking(filter):
   # declare variables
   text = ""
   sentence_array = []
@@ -267,10 +267,8 @@ def caller_text_ranking():
   bloblist = [document]
 
   # generate top keywords
-  data = generate_top_keywords(bloblist)
+  data = generate_top_keywords(bloblist, filter)
   print(data)
   return data
 
 
-# operator_text_ranking()
-caller_text_ranking()
